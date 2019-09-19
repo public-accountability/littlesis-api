@@ -5,7 +5,8 @@
 import isString from 'lodash/isString';
 import isPlainObject from 'lodash/isPlainObject';
 import merge from 'lodash/merge';
-import curry from 'lodash/curry';
+
+const defaultBaseUrl = "https://littlesis.org";
 
 const jsonHeaders = {
   "Content-Type": "application/json",
@@ -82,15 +83,16 @@ export function post(url, data) {
     .then(response => response.json());
 }
 
-
 // Creates an object with versions get() and post() that accept
 // a relative path (i.e. /api/entities/123) using/ the `baseUrl`
 //
 //   client("https://example.com").get("/foo/bar")
 //   is equivalent to get("https://example.com/foo/bar")
+//
+// baseUrl defaults to LittleSis.org
 export function client(baseUrl) {
   const toUrl = path => {
-    let url = new URL(baseUrl);
+    let url = new URL(baseUrl || defaultBaseUrl);
     url.pathname = path;
     return url.toString();    
   }
