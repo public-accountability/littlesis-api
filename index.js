@@ -1,13 +1,11 @@
 /*
-This api client requires and implemention of fetch.
-If using node, you'll have to pollyfill fetch with node-fetch or another library.
-
-Assumes all responses are json.
-
+  This api client uses fetch.
+  Assumes all responses are json.
 */
 import isString from 'lodash/isString';
 import isPlainObject from 'lodash/isPlainObject';
 import merge from 'lodash/merge';
+import curry from 'lodash/curry';
 
 const jsonHeaders = {
   "Content-Type": "application/json",
@@ -34,21 +32,14 @@ function transformPostData(data) {
   }
 }
 
-export function getCsrfToken () {
+function getCsrfToken () {
   return document.head
 		 .querySelector('meta[name="csrf-token"]')
 		 .content;
 }
 
-export function callToken() {
-  return getCsrfToken() + "!!!!";
-}
-
 /**
  * Converts object to query parameter string for HTTP get requests
- *
- * @param {String|Object} queryParams
- * @returns {String} 
  */
 export function qs(queryParams) {
   if (isString(queryParams) && queryParams.includes('=')) {
@@ -68,6 +59,7 @@ export function qs(queryParams) {
   return '';
 };
 
+// get() and post() take the full url as the first parameter.
 
 export function get(url, params) {
   return fetch(url + qs(params),
@@ -88,4 +80,23 @@ export function post(url, data) {
   })
     .then(validateResponse)
     .then(response => response.json());
+}
+
+
+// Creates an object with versions get() and post() that accept
+// a relative path (i.e. /api/entities/123) using/ the `baseUrl`
+//
+//   client("https://example.com").get("/foo/bar")
+//   is equivalent to get("https://example.com/foo/bar")
+export function client(baseUrl) {
+  const toUrl = path => {
+    let url = new URL(baseUrl);
+    url.pathname = path;
+    return url.toString();    
+  }
+
+  return {
+    "get": (path, params) => get(toUrl(path), params),
+    "post": (path, data) => post(toUrl(path), data)
+  }
 }

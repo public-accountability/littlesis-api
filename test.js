@@ -18,8 +18,6 @@ describe('qs', () =>{
 });
 
 describe('http requests', () => {
-  beforeEach(() => fetch.resetMocks());
-
   test('get submits fetch get request', () => {
     fetch.mockResponseOnce(JSON.stringify({ a: '1'}));
     api.get("https://example.com", {foo: 'bar'});
@@ -38,3 +36,12 @@ describe('http requests', () => {
 });
 
 
+describe('client', () =>{
+  test('submits fetch with correct url', () => {
+    fetch.mockResponseOnce(JSON.stringify({ a: '1'}));
+    api
+      .client("https://littlesis.org")
+      .get('api/entities/1')
+    expect(fetch.mock.calls[0][0]).toEqual('https://littlesis.org/api/entities/1')
+  });
+})
