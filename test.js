@@ -14,7 +14,11 @@ describe('qs', () =>{
   test('returns blank string otherwise', () => {
     expect(api.qs(null)).toEqual('');
   });
-  
+
+  test('handles arrays correctly', () => {
+    expect(api.qs({array: [1,2,3] }))
+      .toEqual('?array%5B%5D=1&array%5B%5D=2&array%5B%5D=3');
+  });
 });
 
 describe('http requests', () => {

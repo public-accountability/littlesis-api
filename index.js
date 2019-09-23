@@ -2,21 +2,12 @@
   This api client uses fetch.
   Assumes all responses are json.
 */
-import isString from 'lodash/isString';
+import isArray from 'lodash/isArray';
 import isPlainObject from 'lodash/isPlainObject';
+import isString from 'lodash/isString';
 import merge from 'lodash/merge';
 
 const defaultBaseUrl = "https://littlesis.org";
-
-const jsonHeaders = {
-  "Content-Type": "application/json",
-  "Accept": "application/json"
-};
-
-const defaultFetchOptions = {
-  "credentials": 'same-origin',
-  "headers": jsonHeaders
-}
 
 function validateResponse(res) {
   if (res.status >= 200 && res.status < 300) { return res; }
@@ -33,14 +24,23 @@ function transformPostData(data) {
   }
 }
 
-function getCsrfToken () {
+function getCsrfToken() {
   return document.head
 		 .querySelector('meta[name="csrf-token"]')
 		 .content;
 }
 
+function postHeaders() {
+  return {
+    'Content-Type': "application/json",
+    'Accept': "application/json",
+    'X-CSRF-Token': getCsrfToken()
+  };
+}
+
 /**
  * Converts object to query parameter string for HTTP get requests
+ * Handles submission of one-dimensional arrays
  */
 export function qs(queryParams) {
   if (isString(queryParams) && queryParams.includes('=')) {
@@ -51,7 +51,14 @@ export function qs(queryParams) {
     let urlSearchParams = new URLSearchParams();
 
     for (var key in queryParams) {
-      urlSearchParams.set(key, queryParams[key]);
+      let val = queryParams[key];
+
+      if (isArray(val)) {
+        let arrayKey = key + "[]";
+        val.forEach(v => urlSearchParams.append(arrayKey, v));
+      } else {
+        urlSearchParams.set(key, val);
+      }
     }
 
     return '?' + urlSearchParams.toString();
@@ -60,23 +67,25 @@ export function qs(queryParams) {
   return '';
 };
 
+const getFetchOptions = {
+  'method': "GET",
+  'credentials': "same-origin",
+  'headers': { "Accept": "application/json" }
+};
+
 // get() and post() take the full url as the first parameter.
 
 export function get(url, params) {
-  return fetch(url + qs(params),
-	       merge(defaultFetchOptions, { "method": "GET"}))
+  return fetch(url + qs(params), getFetchOptions)
     .then(validateResponse)
     .then(response => response.json());
 }
 
 export function post(url, data) {
-  let token = getCsrfToken();
-  let headers = merge(jsonHeaders, { 'X-CSRF-Token': token });
-
   return fetch(url, {
     "method": "POST",
     "credentials": 'same-origin',
-    "headers": headers,
+    "headers": postHeaders(),
     "body": transformPostData(data)
   })
     .then(validateResponse)
@@ -95,10 +104,10 @@ export function client(baseUrl) {
     let url = new URL(baseUrl || defaultBaseUrl);
     url.pathname = path;
     return url.toString();    
-  }
+  };
 
   return {
     "get": (path, params) => get(toUrl(path), params),
     "post": (path, data) => post(toUrl(path), data)
-  }
+  };
 }
