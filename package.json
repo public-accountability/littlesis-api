@@ -20,7 +20,7 @@
     "@babel/preset-env": "^7.7.7",
     "babel-jest": "^24.9.0",
     "jest": "^24.9.0",
-    "jest-fetch-mock": "^3.0.0"
+    "jest-fetch-mock": "^3.0.1"
   },
   "babel": {
     "presets": [

@@ -2,11 +2,8 @@
   This api client uses fetch.
   Assumes all responses are json.
 */
-import isArray from 'lodash/isArray';
-import isPlainObject from 'lodash/isPlainObject';
-import isString from 'lodash/isString';
-import merge from 'lodash/merge';
 
+const { isArray, isPlainObject, isString, merge } = require('lodash');
 const defaultBaseUrl = "https://littlesis.org";
 
 function validateResponse(res) {
