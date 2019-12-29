@@ -1,6 +1,6 @@
 {
   "name": "@public-accountability/littlesis-api",
-  "version": "0.0.6",
+  "version": "0.0.7",
   "description": "library for requests to LittleSis.org",
   "main": "index.js",
   "repository": "https://github.com/public-accountability/littlesis-api.git",
